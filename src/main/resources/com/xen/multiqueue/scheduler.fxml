@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.xen.multiqueue.MQController">
+    <top>
+        <ToolBar>
+            <Button text="Add Process" onAction="#onAddProcess"/>
+            <Button text="Start Scheduling" onAction="#onStart"/>
+        </ToolBar>
+    </top>
+
+    <center>
+        <TableView fx:id="processTable">
+            <columns>
+                <TableColumn fx:id="pidCol" text="PID" prefWidth="80"/>
+                <TableColumn fx:id="prioCol" text="Priority" prefWidth="100"/>
+                <TableColumn fx:id="burstCol" text="Burst" prefWidth="100"/>
+                <TableColumn fx:id="remainCol" text="Remaining" prefWidth="120"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <TextArea fx:id="logArea" prefRowCount="6" editable="false" BorderPane.alignment="CENTER"/>
+    </bottom>
+</BorderPane>

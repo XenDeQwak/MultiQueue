@@ -60,7 +60,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.xen.multiqueue.multiqueue/com.xen.multiqueue.multiqueue.HelloApplication
+                            <mainClass>com.xen.multiqueue.multiqueue/com.xen.multiqueue.MultiQueue
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

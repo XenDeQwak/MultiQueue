@@ -3,6 +3,6 @@ module com.xen.multiqueue.multiqueue {
     requires javafx.fxml;
 
 
-    opens com.xen.multiqueue.multiqueue to javafx.fxml;
-    exports com.xen.multiqueue.multiqueue;
+    opens com.xen.multiqueue to javafx.fxml;
+    exports com.xen.multiqueue;
 }
