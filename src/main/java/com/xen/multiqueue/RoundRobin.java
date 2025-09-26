@@ -3,11 +3,11 @@ package com.xen.multiqueue;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class RRLogic {
+public class RoundRobin {
     private Queue<Process> queue;
     private int timeQuantum;
 
-    public RRLogic(int timeQuantum) {
+    public RoundRobin(int timeQuantum) {
         this.queue = new LinkedList<>();
         this.timeQuantum = timeQuantum;
     }
@@ -26,5 +26,13 @@ public class RRLogic {
 
     public boolean isEmpty() {
         return queue.isEmpty();
+    }
+
+    public void removeProcess(Process p) {
+        queue.remove(p);
+    }
+
+    public Queue<Process> getAllProcesses() {
+        return queue;
     }
 }

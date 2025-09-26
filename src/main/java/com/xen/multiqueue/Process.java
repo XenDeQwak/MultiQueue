@@ -27,6 +27,11 @@ public class Process {
     public IntegerProperty burstTimeProperty() { return burstTime; }
     public IntegerProperty remainingTimeProperty() { return remainingTime; }
     public IntegerProperty priorityProperty() { return priority; }
+    private final IntegerProperty arrivalTime = new SimpleIntegerProperty();
+    public int getArrivalTime() { return arrivalTime.get(); }
+    public void setArrivalTime(int value) { arrivalTime.set(value); }
+    public IntegerProperty arrivalTimeProperty() { return arrivalTime; }
+
 }
 
 
