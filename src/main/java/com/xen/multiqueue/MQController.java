@@ -1,5 +1,6 @@
 package com.xen.multiqueue;
 
+import com.xen.multiqueue.models.Process;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,9 +25,13 @@ public class MQController {
     @FXML private TextField q3Field;
 
     @FXML private TextArea logArea;
-    @FXML private HBox queue1Box, queue2Box, queue3Box, cpuBox;
+    @FXML private HBox queue1Box;
+    @FXML private HBox queue2Box;
+    @FXML private HBox queue3Box;
+    @FXML private HBox cpuBox;
 
     private ObservableList<Process> processes;
+    private RoundRobinScheduler scheduler;
 
     @FXML
     public void initialize() {
@@ -42,13 +47,20 @@ public class MQController {
         burstCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         arrivalCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
 
-        prioCol.setOnEditCommit(e -> e.getRowValue().setPriority(e.getNewValue()));
+        prioCol.setOnEditCommit(e -> {
+            e.getRowValue().setPriority(e.getNewValue());
+            updateVisualizer();
+        });
         burstCol.setOnEditCommit(e -> {
             Process p = e.getRowValue();
             p.setRemainingTime(e.getNewValue());
             p.burstTimeProperty().set(e.getNewValue());
+            updateVisualizer();
         });
-        arrivalCol.setOnEditCommit(e -> e.getRowValue().setArrivalTime(e.getNewValue()));
+        arrivalCol.setOnEditCommit(e -> {
+            e.getRowValue().setArrivalTime(e.getNewValue());
+            updateVisualizer();
+        });
     }
 
     @FXML
@@ -70,21 +82,12 @@ public class MQController {
     private void onStart() {
         try {
             int aging = Integer.parseInt(agingField.getText());
-            int deaging = Integer.parseInt(deagingField.getText());
-            int q1 = Integer.parseInt(q1Field.getText());
-            int q2 = Integer.parseInt(q2Field.getText());
-            int q3 = Integer.parseInt(q3Field.getText());
-
-            int[] quantums = {q1, q2, q3};
-            RoundRobinScheduler scheduler = new RoundRobinScheduler(2, quantums, logArea);
-            scheduler.setAgingTime(aging);
-            scheduler.setDeAgingTime(deaging);
-
-            scheduler.setVisualizerUpdate(() -> Platform.runLater(this::updateVisualizer));
-            scheduler.setCpuUpdate(pid -> Platform.runLater(() -> showInCpu(pid)));
+            scheduler = getRoundRobinScheduler(aging);
 
             for (Process p : processes) {
-                scheduler.addProcess(new Process(p.getPid(), p.getBurstTime(), p.getPriority()));
+                Process clone = new Process(p.getPid(), p.getBurstTime(), p.getPriority());
+                clone.setArrivalTime(p.getArrivalTime());
+                scheduler.addProcess(clone);
             }
 
             new Thread(scheduler::schedule).start();
@@ -94,21 +97,46 @@ public class MQController {
         }
     }
 
+    private RoundRobinScheduler getRoundRobinScheduler(int aging) {
+        int deaging = Integer.parseInt(deagingField.getText());
+        int q1 = Integer.parseInt(q1Field.getText());
+        int q2 = Integer.parseInt(q2Field.getText());
+        int q3 = Integer.parseInt(q3Field.getText());
+
+        int[] quantums = {q1, q2, q3};
+        RoundRobinScheduler getScheduler = new RoundRobinScheduler(quantums, logArea);
+        getScheduler.setAgingTime(aging);
+        getScheduler.setDeAgingTime(deaging);
+
+        getScheduler.setVisualizerUpdate(() -> Platform.runLater(this::updateVisualizer));
+        getScheduler.setCpuUpdate(pid -> Platform.runLater(() -> showInCpu(pid)));
+        return getScheduler;
+    }
+
     private void updateVisualizer() {
         queue1Box.getChildren().clear();
         queue2Box.getChildren().clear();
         queue3Box.getChildren().clear();
 
-        for (Process p : processes) {
-            Label procBox = new Label(p.getPid());
-            procBox.setStyle("-fx-border-color:black; -fx-padding:5; -fx-background-color:lightblue;");
-            switch (p.getPriority()) {
-                case 1 -> queue1Box.getChildren().add(procBox);
-                case 2 -> queue2Box.getChildren().add(procBox);
-                case 3 -> queue3Box.getChildren().add(procBox);
+        if (scheduler == null) return;
+
+        for (int i = 0; i < 3; i++) {
+            ObservableList<Label> labels = FXCollections.observableArrayList();
+            for (Process p : scheduler.getAllProcessesInQueue(i)) {
+                if (p.getCurrentQueueIndex() == -1) continue;
+
+                Label procBox = new Label(p.getPid());
+                procBox.setStyle("-fx-border-color:black; -fx-padding:5; -fx-background-color:lightblue;");
+                labels.add(procBox);
+            }
+            switch (i) {
+                case 0 -> queue1Box.getChildren().addAll(labels);
+                case 1 -> queue2Box.getChildren().addAll(labels);
+                case 2 -> queue3Box.getChildren().addAll(labels);
             }
         }
     }
+
 
     private void showInCpu(String pid) {
         cpuBox.getChildren().clear();
