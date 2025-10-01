@@ -125,8 +125,22 @@ public class MQController {
             for (Process p : scheduler.getAllProcessesInQueue(i)) {
                 if (p.getCurrentQueueIndex() == -1) continue;
 
+                String color;
+
+                switch(p.getPriority()) {
+                    case 1 -> color = "lightgreen";
+                    case 2 -> color = "lightyellow";
+                    case 3 -> color = "tomato";
+                    default -> color = "lightblue";
+                }
+
                 Label procBox = new Label(p.getPid());
-                procBox.setStyle("-fx-border-color:black; -fx-padding:5; -fx-background-color:lightblue;");
+                procBox.setStyle("-fx-border-color: black; " +
+                        "-fx-padding: 5; " +
+                        "-fx-background-color: " +
+                        color + "; " +
+                        "-fx-border-radius: 5; " +
+                        "-fx-background-radius: 5;");
                 labels.add(procBox);
             }
             switch (i) {
