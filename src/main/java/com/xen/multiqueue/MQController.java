@@ -4,7 +4,13 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.HBox;
 import javafx.util.converter.IntegerStringConverter;
@@ -101,8 +107,14 @@ public class MQController {
 
         for (Process p : processes) {
             Label procBox = new Label(p.getPid());
-            procBox.setStyle("-fx-border-color:black; -fx-padding:5; -fx-background-color:lightblue;");
+            String color = null;
             switch (p.getPriority()) {
+             case 1 -> color = "lightgreen";   
+             case 2 -> color = "lightyellow";  
+            case 3 -> color = "lightred";   
+            }
+    procBox.setStyle("-fx-border-color: black; " + "-fx-padding: 5; " +"-fx-background-color: " + color + "; " +"-fx-border-radius: 5; " +"-fx-background-radius: 5;");
+            switch (p.getPriority()){
                 case 1 -> queue1Box.getChildren().add(procBox);
                 case 2 -> queue2Box.getChildren().add(procBox);
                 case 3 -> queue3Box.getChildren().add(procBox);
@@ -114,7 +126,7 @@ public class MQController {
         cpuBox.getChildren().clear();
         if (pid != null) {
             Label procBox = new Label(pid);
-            procBox.setStyle("-fx-border-color:orange; -fx-padding:5; -fx-background-color:lightyellow;");
+            procBox.setStyle("-fx-border-color:blue; -fx-padding:5; -fx-background-color:lightblue; -fx-border-radius: 5; -fx-background-radius:5;");
             cpuBox.getChildren().add(procBox);
         }
     }
