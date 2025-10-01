@@ -59,7 +59,7 @@
                 <HBox fx:id="queue3Box" spacing="5"/>
             </HBox>
             <HBox spacing="5">
-                <Label text="CPU:" style="-fx-font-weight:bold; -fx-text-fill:orange;"/>
+                <Label text="CPU:" style="-fx-font-weight:bold; -fx-text-fill:blue;"/>
                 <HBox fx:id="cpuBox" spacing="5"/>
             </HBox>
             <Label text="Scheduler Log:" style="-fx-font-weight:bold;"/>
