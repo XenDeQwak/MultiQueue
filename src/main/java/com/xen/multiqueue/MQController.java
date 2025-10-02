@@ -1,11 +1,18 @@
 package com.xen.multiqueue;
 
 import com.xen.multiqueue.models.Process;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.HBox;
 import javafx.util.converter.IntegerStringConverter;
@@ -61,6 +68,32 @@ public class MQController {
             e.getRowValue().setArrivalTime(e.getNewValue());
             updateVisualizer();
         });
+
+        //deafult values
+        processes = FXCollections.observableArrayList(
+            new Process("P1",20,3),
+            new Process("P2",10,2),
+            new Process("P3",2,1),
+            new Process("P4",7,2),
+            new Process("P5",15,3),
+            new Process("P6",8,2),
+            new Process("P7",4,1)
+        );
+
+        processes.get(0).setArrivalTime(1);
+        processes.get(1).setArrivalTime(3);
+        processes.get(2).setArrivalTime(5);
+        processes.get(3).setArrivalTime(8);
+        processes.get(4).setArrivalTime(11);
+        processes.get(5).setArrivalTime(15);
+        processes.get(6).setArrivalTime(20);
+
+        for (Process p : processes){
+            p.setRemainingTime(p.getBurstTime());
+        }
+
+        processTable.setItems(processes);
+        updateVisualizer();
     }
 
     @FXML
