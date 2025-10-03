@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.xen.multiqueue.MQController">
+
+    <top>
+        <ToolBar>
+            <Button text="Add Process" onAction="#onAddProcess"/>
+
+            <Separator orientation="VERTICAL"/>
+
+            <Label text="Aging TU:"/>
+            <TextField fx:id="agingField" prefWidth="60"/>
+
+            <Label text="De-Aging TU:"/>
+            <TextField fx:id="deagingField" prefWidth="60"/>
+
+            <Label text="Q1:"/>
+            <TextField fx:id="q1Field" prefWidth="50"/>
+
+            <Label text="Q2:"/>
+            <TextField fx:id="q2Field" prefWidth="50"/>
+
+            <Label text="Q3:"/>
+            <TextField fx:id="q3Field" prefWidth="50"/>
+
+            <Button text="Start Scheduling" onAction="#onStart"/>
+        </ToolBar>
+    </top>
+
+    <center>
+        <TableView fx:id="processTable" editable="true">
+            <columns>
+                <TableColumn fx:id="pidCol" text="PID" prefWidth="80"/>
+                <TableColumn fx:id="prioCol" text="Priority" prefWidth="80"/>
+                <TableColumn fx:id="burstCol" text="Burst" prefWidth="80"/>
+                <TableColumn fx:id="arrivalCol" text="Arrival" prefWidth="80"/>
+                <TableColumn fx:id="remainCol" text="Remaining" prefWidth="80"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <VBox spacing="8" style="-fx-padding:10;">
+            <HBox spacing="5">
+                <Label text="Queue 1:" style="-fx-font-weight:bold;"/>
+                <HBox fx:id="queue1Box" spacing="5"/>
+            </HBox>
+            <HBox spacing="5">
+                <Label text="Queue 2:" style="-fx-font-weight:bold;"/>
+                <HBox fx:id="queue2Box" spacing="5"/>
+            </HBox>
+            <HBox spacing="5">
+                <Label text="Queue 3:" style="-fx-font-weight:bold;"/>
+                <HBox fx:id="queue3Box" spacing="5"/>
+            </HBox>
+            <HBox spacing="5">
+                <Label text="CPU:" style="-fx-font-weight:bold; -fx-text-fill:blue;"/>
+                <HBox fx:id="cpuBox" spacing="5"/>
+            </HBox>
+            <Label text="Scheduler Log:" style="-fx-font-weight:bold;"/>
+            <TextArea fx:id="logArea" prefRowCount="6" wrapText="true"
+                      editable="false" style="-fx-font-family:monospace;"/>
+        </VBox>
+    </bottom>
+</BorderPane>
