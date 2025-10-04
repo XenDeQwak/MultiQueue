@@ -29,11 +29,13 @@ public class MQController {
     @FXML private TextField q1Field;
     @FXML private TextField q2Field;
     @FXML private TextField q3Field;
+    @FXML private TextField q4Field;
 
     @FXML private TextArea logArea;
     @FXML private HBox queue1Box;
     @FXML private HBox queue2Box;
     @FXML private HBox queue3Box;
+    @FXML private HBox queue4Box;
     @FXML private HBox cpuBox;
 
     private ObservableList<Process> processes;
@@ -69,7 +71,7 @@ public class MQController {
 
         //deafult values
         processes = FXCollections.observableArrayList(
-            new Process("P1",20,3),
+            new Process("P1",20,4),
             new Process("P2",10,2),
             new Process("P3",2,1),
             new Process("P4",7,2),
@@ -124,7 +126,7 @@ public class MQController {
             new Thread(scheduler::schedule).start();
 
         } catch (NumberFormatException e) {
-            showAlert("Enter valid integers for aging, de-aging, and quantums.");
+            showAlert("Enter valid integers for aging, de-aging, and quantumTime.");
         }
     }
 
@@ -133,9 +135,10 @@ public class MQController {
         int q1 = Integer.parseInt(q1Field.getText());
         int q2 = Integer.parseInt(q2Field.getText());
         int q3 = Integer.parseInt(q3Field.getText());
+        int q4 = Integer.parseInt(q4Field.getText());
 
-        int[] quantums = {q1, q2, q3};
-        RoundRobinScheduler getScheduler = new RoundRobinScheduler(quantums, logArea);
+        int[] quantumTime = {q1, q2, q3, q4};
+        RoundRobinScheduler getScheduler = new RoundRobinScheduler(quantumTime, logArea);
         getScheduler.setAgingTime(aging);
         getScheduler.setDeAgingTime(deaging);
 
@@ -148,10 +151,11 @@ public class MQController {
         queue1Box.getChildren().clear();
         queue2Box.getChildren().clear();
         queue3Box.getChildren().clear();
+        queue4Box.getChildren().clear();
 
         if (scheduler == null) return;
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
             ObservableList<Label> labels = FXCollections.observableArrayList();
             for (Process p : scheduler.getAllProcessesInQueue(i)) {
                 if (p.getCurrentQueueIndex() == -1) continue;
@@ -162,6 +166,7 @@ public class MQController {
                     case 1 -> color = "lightgreen";
                     case 2 -> color = "lightyellow";
                     case 3 -> color = "tomato";
+                    case 4 -> color = "red";
                     default -> color = "lightblue";
                 }
 
@@ -178,6 +183,7 @@ public class MQController {
                 case 0 -> queue1Box.getChildren().addAll(labels);
                 case 1 -> queue2Box.getChildren().addAll(labels);
                 case 2 -> queue3Box.getChildren().addAll(labels);
+                case 3 -> queue4Box.getChildren().addAll(labels);
             }
         }
     }

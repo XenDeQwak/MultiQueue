@@ -28,6 +28,9 @@
             <Label text="Q3:"/>
             <TextField fx:id="q3Field" prefWidth="50"/>
 
+            <Label text="Q4:"/>
+            <TextField fx:id="q4Field" prefWidth="50"/>
+
             <Button text="Start Scheduling" onAction="#onStart"/>
         </ToolBar>
     </top>
@@ -56,6 +59,10 @@
             <HBox spacing="5">
                 <Label text="Queue 3:" style="-fx-font-weight:bold;"/>
                 <HBox fx:id="queue3Box" spacing="5"/>
+            </HBox>
+            <HBox spacing="5">
+                <Label text="Queue 4: " style="-fx-font-weight:bold;"/>
+                <HBox fx:id="queue4Box" spacing ="5" />
             </HBox>
             <HBox spacing="5">
                 <Label text="CPU:" style="-fx-font-weight:bold; -fx-text-fill:blue;"/>

@@ -14,6 +14,7 @@ public class Process {
     private final IntegerProperty waitingTime = new SimpleIntegerProperty(0);
     private final IntegerProperty cpuTimeUsed = new SimpleIntegerProperty(0);
     private int currentQueueIndex = -1;
+    private boolean running;
 
     public Process(String pid, int burstTime, int priority) {
         this.pid = new SimpleStringProperty(pid);
@@ -32,7 +33,7 @@ public class Process {
     public void setRemainingTime(int v) { remainingTime.set(v); }
     public void setPriority(int v) { priority.set(v); }
     public void setArrivalTime(int v) { arrivalTime.set(v); }
-
+    public void setRunning(boolean r) {this.running = r; }
     public void incrementWaitingTime(int delta) { waitingTime.set(waitingTime.get() + delta); }
     public void resetWaitingTime() { waitingTime.set(0); }
     public void incrementCpuTime(int delta) { cpuTimeUsed.set(cpuTimeUsed.get() + delta); }
@@ -40,10 +41,14 @@ public class Process {
 
     public StringProperty pidProperty() { return pid; }
     public IntegerProperty burstTimeProperty() { return burstTime; }
-    public IntegerProperty remainingTimeProperty() { return remainingTime; }
     public IntegerProperty priorityProperty() { return priority; }
     public IntegerProperty arrivalTimeProperty() { return arrivalTime; }
     public int getCurrentQueueIndex() { return currentQueueIndex; }
     public void setCurrentQueueIndex(int q) { this.currentQueueIndex = q; }
+    public boolean isRunning() {return running; }
+    private boolean justPromoted = true;
+
+    public boolean justPromoted() { return justPromoted; }
+    public void setJustPromoted(boolean val) { justPromoted = val; }
 
 }
