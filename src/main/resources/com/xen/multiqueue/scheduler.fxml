@@ -39,7 +39,6 @@
                 <TableColumn fx:id="prioCol" text="Priority" prefWidth="80"/>
                 <TableColumn fx:id="burstCol" text="Burst" prefWidth="80"/>
                 <TableColumn fx:id="arrivalCol" text="Arrival" prefWidth="80"/>
-                <TableColumn fx:id="remainCol" text="Remaining" prefWidth="80"/>
             </columns>
         </TableView>
     </center>

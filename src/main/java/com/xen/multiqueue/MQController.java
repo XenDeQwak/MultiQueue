@@ -23,7 +23,6 @@ public class MQController {
     @FXML private TableColumn<Process, String> pidCol;
     @FXML private TableColumn<Process, Integer> prioCol;
     @FXML private TableColumn<Process, Integer> burstCol;
-    @FXML private TableColumn<Process, Integer> remainCol;
     @FXML private TableColumn<Process, Integer> arrivalCol;
     @FXML private TextField agingField;
     @FXML private TextField deagingField;
@@ -45,7 +44,6 @@ public class MQController {
         pidCol.setCellValueFactory(data -> data.getValue().pidProperty());
         prioCol.setCellValueFactory(data -> data.getValue().priorityProperty().asObject());
         burstCol.setCellValueFactory(data -> data.getValue().burstTimeProperty().asObject());
-        remainCol.setCellValueFactory(data -> data.getValue().remainingTimeProperty().asObject());
         arrivalCol.setCellValueFactory(data -> data.getValue().arrivalTimeProperty().asObject());
 
         processTable.setEditable(true);
