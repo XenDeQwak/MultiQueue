@@ -24,66 +24,22 @@ public class RoundRobinScheduler {
         for (int i = 0; i < quantums.length; i++) queues[i] = new RoundRobin(quantums[i]);
     }
 
-    public void addProcess(Process p) {
-        pending.add(p);
-    }
+    public void addProcess(Process p) { pending.add(p); }
 
     public void schedule() {
         globalTime = 0;
-
         while (!allQueuesEmpty() || !pending.isEmpty()) {
-            globalTime++;
-
             releaseArrivedProcesses();
-            applyAgingForAllWaiting();
 
             RoundRobin queueToRun = getHighestPriorityNonEmptyQueue();
             if (queueToRun == null) {
                 logCPUidle();
+                globalTime++;
                 continue;
             }
 
-            Process p = queueToRun.getNextProcess();
-            p.setRunning(true);
-            notifyCpu(p.getPid());
-
-            p.setRemainingTime(p.getRemainingTime() - 1);
-            p.incrementCpuTime(1);
-
-            if (logArea != null) {
-                logArea.appendText("t=" + globalTime + ": " + p.getPid() + " running (1 TU)\n");
-                logStatus(p);
-            }
-
-            incrementWaitingTimesForAllWaitingExcept(p);
-
-            if (deAgingTimeUnit > 0 && p.getCpuTimeUsed() >= deAgingTimeUnit && p.getPriority() < queues.length) {
-                queueToRun.removeProcess(p);
-                p.setPriority(p.getPriority() + 1);
-                queues[p.getPriority() - 1].addProcess(p);
-                p.setCurrentQueueIndex(p.getPriority() - 1);
-                p.resetCpuTime();
-                if (logArea != null)
-                    logArea.appendText("t=" + globalTime + ": " + p.getPid() + " de-aged to queue " + p.getPriority() + "\n");
-                notifyVisualizer();
-                p.setRunning(false);
-                continue;
-            }
-
-            if (p.getRemainingTime() <= 0) {
-                queueToRun.removeProcess(p);
-                p.setCurrentQueueIndex(-1);
-                if (logArea != null)
-                    logArea.appendText("t=" + globalTime + ": " + p.getPid() + " finished\n");
-            } else {
-                queueToRun.requeueProcess(p);
-            }
-
-            p.setRunning(false);
-            notifyVisualizer();
-            sleep(500);
+            runQueueStep(queueToRun);
         }
-
         notifyCpu(null);
     }
 
@@ -92,6 +48,18 @@ public class RoundRobinScheduler {
             if (!q.isEmpty()) return q;
         }
         return null;
+    }
+
+    private void logCPUidle() {
+        if (logArea != null) logArea.appendText("t=" + globalTime + ": CPU idle\n");
+        notifyCpu(null);
+        notifyVisualizer();
+        sleep(500);
+    }
+
+    private boolean allQueuesEmpty() {
+        for (RoundRobin q : queues) if (!q.isEmpty()) return false;
+        return true;
     }
 
     private void releaseArrivedProcesses() {
@@ -113,23 +81,56 @@ public class RoundRobinScheduler {
         if (!toRelease.isEmpty()) notifyVisualizer();
     }
 
-    private void applyAgingForAllWaiting() {
-        for (int i = queues.length - 1; i > 0; i--) {
-            List<Process> toPromote = new ArrayList<>();
-            for (Process p : new ArrayList<>(queues[i].getAllProcesses())) {
-                if (!p.isRunning() && p.getWaitingTime() >= agingTimeUnit) {
-                    queues[i].removeProcess(p);
-                    p.setPriority(p.getPriority() - 1);
-                    queues[p.getPriority() - 1].addProcess(p);
-                    p.setCurrentQueueIndex(p.getPriority() - 1);
-                    p.resetWaitingTime();
-                    toPromote.add(p);
-                }
+    private void runQueueStep(RoundRobin q) {
+        Process p = q.getNextProcess();
+        p.setRunning(true);
+        notifyCpu(p.getPid());
+        notifyVisualizer();
+
+        int slice = Math.min(p.getRemainingTime(), q.getQuantum());
+
+        for (int i = 0; i < slice; i++) {
+            globalTime++;
+            p.incrementCpuTime(1);
+            p.setRemainingTime(p.getRemainingTime() - 1);
+
+            if (logArea != null) {
+                logArea.appendText("t=" + globalTime + ": " + p.getPid() + " running (1 TU)\n");
+                logStatus(p);
             }
-            for (Process p : toPromote) {
+
+            sleep(500);
+
+            incrementWaitingTimesForAllWaitingExcept(p);
+            applyAgingForAllWaiting();
+
+            if (deAgingTimeUnit > 0 && p.getCpuTimeUsed() >= deAgingTimeUnit && p.getPriority() < queues.length) {
+                RoundRobin oldQueue = queues[p.getPriority() - 1];
+                oldQueue.removeProcess(p);
+                p.setPriority(p.getPriority() + 1);
+                queues[p.getPriority() - 1].addProcess(p);
+                p.setCurrentQueueIndex(p.getPriority() - 1);
+                p.resetCpuTime();
                 if (logArea != null)
-                    logArea.appendText("t=" + globalTime + ": " + p.getPid() + " aged up to queue " + p.getPriority() + "\n");
+                    logArea.appendText("t=" + globalTime + ": " + p.getPid() + " de-aged to queue " + p.getPriority() + "\n");
+                notifyVisualizer();
+                p.setRunning(false);
+                return;
             }
+        }
+
+
+        p.setRunning(false);
+        handlePostExecution(p, q);
+    }
+
+    private void handlePostExecution(Process p, RoundRobin q) {
+        if (p.getRemainingTime() <= 0) {
+            p.setCurrentQueueIndex(-1);
+            if (logArea != null) logArea.appendText("t=" + globalTime + ": " + p.getPid() + " finished\n");
+        } else {
+            q.requeueProcess(p);
+            p.setCurrentQueueIndex(q.getQuantum() - 1);
         }
     }
 
@@ -141,11 +142,24 @@ public class RoundRobinScheduler {
         }
     }
 
-    private void logCPUidle() {
-        if (logArea != null) logArea.appendText("t=" + globalTime + ": CPU idle\n");
-        notifyCpu(null);
-        notifyVisualizer();
-        sleep(500);
+    private void applyAgingForAllWaiting() {
+        for (int i = queues.length - 1; i > 0; i--) {
+            List<Process> toPromote = new ArrayList<>();
+            for (Process p : new ArrayList<>(queues[i].getAllProcesses())) {
+                if (!p.isRunning() && p.getWaitingTime() >= agingTimeUnit) {
+                    p.resetWaitingTime();
+                    queues[i].removeProcess(p);
+                    p.setPriority(p.getPriority() - 1);
+                    queues[p.getPriority() - 1].addProcess(p);
+                    p.setCurrentQueueIndex(p.getPriority() - 1);
+                    toPromote.add(p);
+                }
+            }
+            for (Process p : toPromote) {
+                if (logArea != null)
+                    logArea.appendText("t=" + globalTime + ": " + p.getPid() + " aged up to queue " + p.getPriority() + "\n");
+            }
+        }
     }
 
     private void logStatus(Process p) {
@@ -156,11 +170,6 @@ public class RoundRobinScheduler {
                 + " | Remaining=" + p.getRemainingTime()
                 + " | TimeToAge=" + (timeToAge >= 0 ? timeToAge : "N/A")
                 + " | TimeToDeAge=" + (timeToDeAge >= 0 ? timeToDeAge : "N/A") + "\n");
-    }
-
-    private boolean allQueuesEmpty() {
-        for (RoundRobin q : queues) if (!q.isEmpty()) return false;
-        return true;
     }
 
     private void sleep(long millis) {
@@ -177,7 +186,8 @@ public class RoundRobinScheduler {
 
     public List<Process> getAllProcessesInQueue(int index) {
         if (index < 0 || index >= queues.length) return new ArrayList<>();
-        return queues[index].getAllProcesses().stream()
+        return queues[index].getAllProcesses()
+                .stream()
                 .filter(p -> p.getCurrentQueueIndex() != -1)
                 .toList();
     }
